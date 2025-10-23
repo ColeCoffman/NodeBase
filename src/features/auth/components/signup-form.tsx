@@ -91,7 +91,7 @@ export function SignupForm() {
                     disabled={isPending}
                   >
                     <Image
-                      src="/github.svg"
+                      src="/logos/github.svg"
                       alt="GitHub"
                       width={20}
                       height={20}
@@ -105,7 +105,7 @@ export function SignupForm() {
                     disabled={isPending}
                   >
                     <Image
-                      src="/google.svg"
+                      src="/logos/google.svg"
                       alt="Google"
                       width={20}
                       height={20}
