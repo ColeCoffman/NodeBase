@@ -1,23 +1,26 @@
-import { prisma } from "@/lib/db";
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
+import { generateText } from "ai";
 import { inngest } from "./client";
 
-export const createWorkflow = inngest.createFunction(
-  { id: "workflow/create" },
-  { event: "workflow/create" },
-  async ({ event, step }) => {
-    await step.run("create-workflow", async () => {
-      if (!event.data.userId) {
-        throw new Error("User ID is required to create a workflow");
-      }
+const lmstudio = createOpenAICompatible({
+  name: "lmstudio",
+  baseURL: process.env.OPENAI_URL!,
+});
 
-      await prisma.workflow.create({
-        data: {
-          name: "workflow-from-inngest",
-          description: "Workflow created from inngest",
-          userId: event.data.userId,
-        },
-      });
-      return { message: `Workflow created!`, success: true };
-    });
+export const execute = inngest.createFunction(
+  { id: "execute-ai" },
+  { event: "execute/ai" },
+  async ({ event, step }) => {
+    const { steps: lmstudioSteps } = await step.ai.wrap(
+      "OpenAI Compatible (LMStudio) Genearate Text",
+      generateText,
+      {
+        system: "You are a helpful assistant that can generate text.",
+        prompt: "What is 2 + 2?",
+        model: lmstudio("meta-llama_-_llama-3.2-1b"),
+      }
+    );
+
+    return { lmstudioSteps };
   }
 );
