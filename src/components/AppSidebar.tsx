@@ -11,6 +11,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { useHasActiveSubscription } from "@/features/auth/components/subscriptions/hooks/use-subscription";
 import { authClient } from "@/lib/auth-client";
 import {
   CreditCardIcon,
@@ -50,6 +51,7 @@ const sidebarItems = [
 const AppSidebar = () => {
   const router = useRouter();
   const pathname = usePathname();
+  const { hasActiveSubscription, isLoading } = useHasActiveSubscription();
 
   return (
     <Sidebar collapsible="icon">
@@ -104,28 +106,26 @@ const AppSidebar = () => {
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              tooltip="Upgrade to Pro"
-              className="gap-x-4 h-10 px-4"
-              asChild
-            >
-              <Link href="#" prefetch>
+          {!hasActiveSubscription && !isLoading && (
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                tooltip="Upgrade to Pro"
+                className="gap-x-4 h-10 px-4"
+                onClick={() => authClient.checkout({ slug: "pro" })}
+              >
                 <StarIcon className="size-4" />
                 <span className="truncate">Upgrade to Pro</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
           <SidebarMenuItem>
             <SidebarMenuButton
               tooltip="Billing"
               className="gap-x-4 h-10 px-4"
-              asChild
+              onClick={() => authClient.customer.portal()}
             >
-              <Link href="#" prefetch>
-                <CreditCardIcon className="size-4" />
-                <span className="truncate">Billing</span>
-              </Link>
+              <CreditCardIcon className="size-4" />
+              <span className="truncate">Billing</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
