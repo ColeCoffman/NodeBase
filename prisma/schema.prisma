@@ -24,7 +24,7 @@ model User {
   updatedAt     DateTime   @default(now()) @updatedAt
   sessions      Session[]
   accounts      Account[]
-  Workflow      Workflow[]
+  workflows     Workflow[]
 
   @@unique([email])
   @@map("user")
