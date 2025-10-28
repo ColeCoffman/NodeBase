@@ -1,9 +1,9 @@
 procs:
-  inngest:
-    cmd: ["npm", "run", "inngest:dev"]
-
   next:
     cmd: ["npm", "run", "dev"]
+
+  inngest:
+    cmd: ["npm", "run", "inngest:dev"]
 
   prisma_server:
     cmd: ["npx", "prisma", "dev"]
