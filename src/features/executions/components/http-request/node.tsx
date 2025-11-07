@@ -1,9 +1,12 @@
 "use client";
 
+import { httpRequestChannel } from "@/inngest/channels/http-request";
 import { useReactFlow, type Node, type NodeProps } from "@xyflow/react";
 import { GlobeIcon } from "lucide-react";
 import { memo, useState } from "react";
+import { useNodeStatus } from "../../hooks/use-node-status";
 import { BaseExecutionNode } from "../base-execution-node";
+import { fetchHttpRequestRealtimeToken } from "./actions";
 import { HttpRequestDialog, HttpRequestFormValues } from "./dialog";
 
 type HttpRequestNodeData = {
@@ -23,7 +26,12 @@ export const HttpRequestNode = memo((props: NodeProps<HttpRequestNodeType>) => {
 
   const [open, setOpen] = useState(false);
   const handleOpenSettings = () => setOpen(true);
-  const status = "initial";
+  const status = useNodeStatus({
+    nodeId: props.id,
+    channel: httpRequestChannel().name,
+    topic: "status",
+    refreshToken: fetchHttpRequestRealtimeToken,
+  });
   const { setNodes } = useReactFlow();
 
   const handleSubmit = (values: HttpRequestFormValues) => {

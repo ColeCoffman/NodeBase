@@ -6,7 +6,7 @@ procs:
     cmd: ["npm", "run", "inngest:dev"]
 
   prisma_server:
-    cmd: ["npx", "prisma", "dev"]
+    cmd: ["bash", "./scripts/prisma-dev.sh"]
 
   prisma_studio:
     cmd: ["npx", "prisma", "studio", "--browser", "none"]
