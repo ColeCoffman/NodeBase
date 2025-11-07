@@ -10,3 +10,6 @@ procs:
 
   prisma_studio:
     cmd: ["npx", "prisma", "studio", "--browser", "none"]
+
+  ngrok:
+    cmd: ["npm", "run", "ngrok:dev"]
