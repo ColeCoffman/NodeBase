@@ -40,8 +40,8 @@ const httpRequestSchema = z.object({
     .string()
     .min(1, "Variable name is required")
     .regex(
-      /^[a-zA-Z_$][a-zA-Z0-9_$]*$/,
-      "Variable name must start with a letter and contain only letters, numbers, and underscores"
+      /^([a-zA-Z_$][a-zA-Z0-9_$]*|(?:[^{]|{{[^}]+}})+)$/,
+      "Variable name must be a valid identifier (e.g., 'myVariable') or contain handlebar expressions (e.g., 'createdTodo-{{Request.data}}')"
     )
     .optional(),
 });
@@ -119,7 +119,7 @@ export const HttpRequestDialog = ({
                   <FormDescription>
                     Use this variable name to reference the result in other
                     nodes:{" "}
-                    <code className="text-xs font-mono">{`{{${watchVariableName}.httpResponse.data}}`}</code>
+                    <code className="text-xs font-mono">{`{{${watchVariableName}.data}}`}</code>
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
