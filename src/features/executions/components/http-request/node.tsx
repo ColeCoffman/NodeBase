@@ -10,6 +10,7 @@ type HttpRequestNodeData = {
   endpoint?: string;
   method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "OPTIONS" | "HEAD";
   body?: string;
+  variableName?: string;
 };
 
 type HttpRequestNodeType = Node<HttpRequestNodeData>;

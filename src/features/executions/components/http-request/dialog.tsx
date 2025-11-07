@@ -36,6 +36,14 @@ const httpRequestSchema = z.object({
   endpoint: z.url("Please enter a valid URL"),
   method: z.enum(["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"]),
   body: z.string().optional(), // TODO: Add refinement for JSON body
+  variableName: z
+    .string()
+    .min(1, "Variable name is required")
+    .regex(
+      /^[a-zA-Z_$][a-zA-Z0-9_$]*$/,
+      "Variable name must start with a letter and contain only letters, numbers, and underscores"
+    )
+    .optional(),
 });
 
 export type HttpRequestFormValues = z.infer<typeof httpRequestSchema>;
@@ -59,6 +67,7 @@ export const HttpRequestDialog = ({
       endpoint: defaultValues.endpoint ?? "",
       method: defaultValues.method ?? "GET",
       body: defaultValues.body ?? "",
+      variableName: defaultValues.variableName ?? "",
     },
   });
 
@@ -69,10 +78,12 @@ export const HttpRequestDialog = ({
         endpoint: defaultValues.endpoint ?? "",
         method: defaultValues.method ?? "GET",
         body: defaultValues.body ?? "",
+        variableName: defaultValues.variableName ?? "",
       });
     }
   }, [open, defaultValues, form]);
 
+  const watchVariableName = form.watch("variableName") || "myVariable";
   const watchMethod = form.watch("method");
   const showBodyField = ["POST", "PUT", "PATCH"].includes(watchMethod);
 
@@ -95,6 +106,25 @@ export const HttpRequestDialog = ({
             onSubmit={form.handleSubmit(handleSubmit)}
             className="space-y-8 mt-4"
           >
+            {/* Variable Name */}
+            <FormField
+              control={form.control}
+              name="variableName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Variable Name</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="myVariable" />
+                  </FormControl>
+                  <FormDescription>
+                    Use this variable name to reference the result in other
+                    nodes:{" "}
+                    <code className="text-xs font-mono">{`{{${watchVariableName}.httpResponse.data}}`}</code>
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             {/* Method */}
             <FormField
               control={form.control}

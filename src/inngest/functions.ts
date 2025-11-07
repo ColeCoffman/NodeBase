@@ -1,5 +1,4 @@
 import { getExecutor } from "@/features/executions/lib/executor-registry";
-import { NodeType } from "@/generated/prisma/client";
 import prisma from "@/lib/db";
 import { NonRetriableError } from "inngest";
 import { inngest } from "./client";
@@ -28,7 +27,7 @@ export const executeWorkflow = inngest.createFunction(
 
     // Execute each node
     for (const node of sortedNodes) {
-      const executor = getExecutor(node.type as NodeType);
+      const executor = getExecutor(node.type);
       context = await executor({
         data: node.data as Record<string, unknown>,
         nodeId: node.id,

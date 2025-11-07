@@ -1,4 +1,5 @@
 import { Connection, Node } from "@/generated/prisma/client";
+import { NonRetriableError } from "inngest";
 import toposort from "toposort";
 
 export const topologicalSort = (
@@ -37,7 +38,7 @@ export const topologicalSort = (
     sortedNodeIds = [...new Set(sortedNodeIds)];
   } catch (error) {
     if (error instanceof Error && error.message.includes("Cyclic")) {
-      throw new Error("Workflow contains a cycle");
+      throw new NonRetriableError("Workflow contains a cycle");
     }
     throw error;
   }
