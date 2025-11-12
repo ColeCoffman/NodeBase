@@ -1,0 +1,81 @@
+# Woodpecker CI Pipeline for n8nclone Next.js Application
+
+when:
+  event:
+    - push
+    - pull_request
+
+steps:
+  # Install dependencies
+  install:
+    image: node:20-alpine
+    commands:
+      - npm ci
+    volumes:
+      - node_modules:/app/node_modules
+
+  # Generate Prisma Client
+  prisma-generate:
+    image: node:20-alpine
+    commands:
+      - npx prisma generate
+    depends_on:
+      - install
+    volumes:
+      - node_modules:/app/node_modules
+
+  # Run linting
+  lint:
+    image: node:20-alpine
+    commands:
+      - npm run lint
+    depends_on:
+      - install
+    volumes:
+      - node_modules:/app/node_modules
+
+  test:
+    image: node:20-alpine
+    commands:
+      - npm run test
+    depends_on:
+      - install
+    volumes:
+      - node_modules:/app/node_modules
+
+  # Build the application
+  build:
+    image: node:20-alpine
+    commands:
+      - npm run build
+    depends_on:
+      - install
+      - prisma-generate
+    volumes:
+      - node_modules:/app/node_modules
+    when:
+      event:
+        - push
+        - pull_request
+
+  # Optional: Build and push Docker image (uncomment and configure if you have a Dockerfile)
+  docker-build:
+    image: plugins/docker
+    settings:
+      repo: ghcr.io/colecoffman/NodeBase
+      tags:
+        - latest
+        - ${CI_COMMIT_SHA:0:7}
+        - ${CI_COMMIT_BRANCH}
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+    depends_on:
+      - build
+    when:
+      event:
+        - push
+      branch:
+        - main
+        - master
