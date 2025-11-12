@@ -1,4 +1,5 @@
-# Woodpecker CI Pipeline for n8nclone Next.js Application
+# Secure Woodpecker CI Pipeline using Kaniko (No Privileged Access Required)
+# This is more secure than using the Docker plugin
 
 when:
   event:
@@ -11,18 +12,10 @@ steps:
     image: node:20-alpine
     commands:
       - npm ci
-    volumes:
-      - node_modules:/app/node_modules
-
-  # Generate Prisma Client
-  prisma-generate:
-    image: node:20-alpine
-    commands:
-      - npx prisma generate
-    depends_on:
-      - install
-    volumes:
-      - node_modules:/app/node_modules
+    when:
+      event:
+        - push
+        - pull_request
 
   # Run linting
   lint:
@@ -31,17 +24,22 @@ steps:
       - npm run lint
     depends_on:
       - install
-    volumes:
-      - node_modules:/app/node_modules
+    when:
+      event:
+        - push
+        - pull_request
 
+  # Run tests
   test:
     image: node:20-alpine
     commands:
       - npm run test
     depends_on:
       - install
-    volumes:
-      - node_modules:/app/node_modules
+    when:
+      event:
+        - push
+        - pull_request
 
   # Build the application
   build:
@@ -50,27 +48,31 @@ steps:
       - npm run build
     depends_on:
       - install
-      - prisma-generate
-    volumes:
-      - node_modules:/app/node_modules
     when:
       event:
         - push
         - pull_request
 
-  # Optional: Build and push Docker image (uncomment and configure if you have a Dockerfile)
+  # Build and push Docker image using Kaniko (secure, no privileged access)
   docker-build:
-    image: plugins/docker
-    settings:
-      repo: ghcr.io/colecoffman/NodeBase
-      tags:
-        - latest
-        - ${CI_COMMIT_SHA:0:7}
-        - ${CI_COMMIT_BRANCH}
-      username:
+    image: gcr.io/kaniko-project/executor:latest
+    environment:
+      DOCKER_USERNAME:
         from_secret: docker_username
-      password:
+      DOCKER_PASSWORD:
         from_secret: docker_password
+    commands:
+      - mkdir -p /kaniko/.docker
+      - echo "{\"auths\":{\"ghcr.io\":{\"auth\":\"$(echo -n $${DOCKER_USERNAME}:$${DOCKER_PASSWORD} | base64)\"}}}" > /kaniko/.docker/config.json
+      - /kaniko/executor
+        --context=.
+        --dockerfile=Dockerfile
+        --destination=ghcr.io/colecoffman/NodeBase:${CI_COMMIT_SHA:0:7}
+        --destination=ghcr.io/colecoffman/NodeBase:latest
+        --cache=true
+        --cache-ttl=24h
+        --snapshot-mode=redo
+        --use-new-run
     depends_on:
       - build
     when:
