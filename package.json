@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^2.0.37",
-    "@ai-sdk/openai": "^2.0.53",
+    "@ai-sdk/openai": "^2.0.60",
     "@ai-sdk/openai-compatible": "^1.0.22",
     "@hookform/resolvers": "^5.2.2",
     "@inngest/realtime": "^0.4.4",
